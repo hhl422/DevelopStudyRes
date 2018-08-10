@@ -17,6 +17,9 @@ apply plugin: 'war' //for webapp->生成。war->部署到Tomcat目录下->直接发布
 
 // In this section you declare where to find the dependencies of your project
 repositories {
+	maven{
+		url ''
+	}
     // Use 'jcenter' for resolving your dependencies.
     // You can declare any Maven/Ivy/file repository here.
     jcenter()
@@ -34,6 +37,27 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
-tasks.withType(JavaCompile) { 
-	options.encoding = "UTF-8" 
-} 
+//自定义任务
+def createDir = {
+	paths ->
+		File dir = new File(paths);
+		if(!dir.exists()){
+			dir.mkdirs();
+		}
+}
+
+task makeJavaDir(){
+	def paths = ['src/main/java','src/main/resources','src/test/java','src/test/resources'];
+	doFirst{
+		paths.foreach(createDir);//调用闭包
+	}
+}
+
+task makeWebDir(){
+	dependsOn 'makeJavaDir' //任务依赖
+	def paths = ['src/main/web','src/test/web'];
+	doLast{
+		paths.foreach(createDir);//调用闭包
+	}
+}
+
